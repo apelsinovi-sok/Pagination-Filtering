@@ -1,18 +1,18 @@
 <?php
 class Origin {
 
-	public $filter;
-	public $page;
-	public $quantity = 15;
-	public $request;
+	private $filter;//запрос фильрации из url 
+	private $page;//запрос номера страницы из url
+	public $quantity = 5;//колличество постов на одной странице 
+	private $request;//sql запрос фильтрации
 
 
 	public function __construct(){
 
-		isset($_GET['filter']) ? $this->filter = $_GET['filter'] : $this->filter = NULL;
+		    isset($_GET['filter']) ? $this->filter = $_GET['filter'] : $this->filter = NULL;
         intval($_GET['page']) > 0  ? $this->page = $_GET['page'] : $this->page = 1;
 
-        $this->request = $this->create_request();
+        $this->request = $this->create_request();//формирование sql запроса фильтрации
    
 	} 
 
@@ -49,11 +49,10 @@ class Origin {
  public $request;
  public $page;
  public $quantity;
- public $count;
+ public $count;//колличество записей в бд
  public $dbname;
- public $table;
- public $buyers = array();
- private $page_array = array();
+ public $buyers = array();//массив выводимых постов 
+ private $page_array = array();//массив с ссылками для пагинации
 
 	public function __construct($request, $page, $quantity, $filter){
 	   require_once (ROOT.'/db/rb-mysql.php');
@@ -67,9 +66,9 @@ class Origin {
        $this->create_list_product();
 	}
 
-	private function create_list_product(){
+	private function create_list_product(){//создание массива постов исходя из запроса фильрации и номера страницы 
 
-		$right =  $this->page*$this->quantity;
+		    $right =  $this->page*$this->quantity;
         $left =  $right-$this->quantity;
         $buyers = R::getAll(" SELECT * FROM `buyers` $this->request LIMIT $left, $this->quantity ");
         if($buyers)
@@ -80,11 +79,11 @@ class Origin {
 
 	public function pagination_view(){
 
-         $number_of_pages = ceil($this->count/$this->quantity);
-         $argument = array();//сборка url запроса
+         $number_of_pages = ceil($this->count/$this->quantity);//колличество страниц для пагинации
+         $argument = array();//сборка ссылок для пагинации
 
 	     if(isset($this->request))//если в строке запроса указан фильтр, то добавить его в массив 
-		 $argument['filter'] = $this->filter;
+		     $argument['filter'] = $this->filter;
 
          if($number_of_pages>1){//если список занимает больше одной страницы, создать функцию вывода пагинации, в противном случае не отображать
 
@@ -97,7 +96,7 @@ class Origin {
 		     $this->page_array[$i] = $get_query;
 
 		    }
-		 }
+		  }
           return $this->page_array;
 	  }
 }
